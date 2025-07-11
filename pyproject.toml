@@ -1,0 +1,26 @@
+[project]
+name = "py_win_auto"
+version = "0.1.0"
+description = "A simple automated script"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+authors = [
+    { name = "lemonshuo", email = "lemonshuo@126.com" }
+]
+dependencies = [
+    "pywinauto>=0.6.9,<0.7.0",
+    "poetry-core (>=2.0.0,<3.0.0)",
+    "poetry-pyinstaller-plugin (==1.4.0)",
+]
+
+[tool.poetry]
+packages = [
+    { include = "py_win_auto", from = "src" }
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry-pyinstaller-plugin.scripts]
+"auto" = { source = "src/py_win_auto/auto.py", type = "onefile", bundle = false, icon = "app.ico", windowed = false }
