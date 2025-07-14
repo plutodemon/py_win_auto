@@ -1,8 +1,12 @@
-﻿from pywinauto import Application, findwindows
+from pywinauto import Application, findwindows
 import argparse
 import sys
 import json
 
+
+def print_json_and_flush(data):
+    """输出JSON并强制刷新缓冲区"""
+    print(json.dumps(data, ensure_ascii=True))
 
 def main():
     # 解析命令行参数
@@ -18,17 +22,16 @@ def main():
 
     # 参数验证
     if not args.check and not (args.control and args.type):
-        print(json.dumps({"success": False, "error": "必须指定 --check 或者同时指定 --control 和 --type"},
-                         ensure_ascii=True))
-        sys.exit(1)
+        print_json_and_flush({"success": False, "error": "必须指定 --check 或者同时指定 --control 和 --type"})
+        sys.exit(0)
     try:
         # 查找包含指定应用名称的窗口
         app_pattern = f".*{args.app}.*"
         windows = findwindows.find_windows(title_re=app_pattern)
 
         if not windows:
-            print(json.dumps({"success": False, "error": f"未找到{args.app}窗口"}, ensure_ascii=True))
-            sys.exit(1)
+            print_json_and_flush({"success": False, "error": f"未找到包含 '{args.app}' 的窗口"})
+            sys.exit(0)
 
         for window_handle in windows:
             try:
@@ -104,7 +107,7 @@ def main():
                         result["clicked"] = True
 
                     # 输出结果
-                    print(json.dumps(result, ensure_ascii=True))
+                    print_json_and_flush(result)
 
                 except Exception as coord_error:
                     error_result = {
@@ -114,7 +117,7 @@ def main():
                         "control_type": args.type
                     }
 
-                    print(json.dumps(error_result, ensure_ascii=True))
+                    print_json_and_flush(error_result)
 
                 break
 
@@ -131,10 +134,10 @@ def main():
                 "windows_found": len(windows),
                 "dump_file": dump_file if dump_file else None
             }
-            print(json.dumps(result, ensure_ascii=True))
+            print_json_and_flush(result)
 
     except Exception as e:
-        print(json.dumps({"success": False, "error": f"查找{args.app}窗口时发生错误: {str(e)}"}, ensure_ascii=True))
+        print_json_and_flush({"success": False, "error": f"查找{args.app}窗口时发生错误: {str(e)}"})
 
 if __name__ == "__main__":
     main()
