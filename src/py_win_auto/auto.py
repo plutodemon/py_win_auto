@@ -11,19 +11,21 @@ def print_json_and_flush(data):
     print(json.dumps(data, ensure_ascii=True))
 
 
-def find_and_wait_for_windows(app_name, check_interval=1, wait_after_found=13):
+def find_and_wait_for_windows(app_name, check_interval=1, wait_after_found=13, timeout=None):
     """查找窗口，如果没有找到则等待程序启动
     
     Args:
         app_name (str): 应用程序窗口名称
         check_interval (int): 检查间隔时间（秒）
         wait_after_found (int): 找到程序后的等待时间（秒）
+        timeout (int): 超时时间（秒），None表示无限等待
     
     Returns:
-        list: 找到的窗口句柄列表
+        list: 找到的窗口句柄列表，超时时返回None
     """
 
     app_pattern = f".*{app_name}.*"
+    start_time = time.time()
 
     while True:
         windows = findwindows.find_windows(title_re=app_pattern)
@@ -31,6 +33,12 @@ def find_and_wait_for_windows(app_name, check_interval=1, wait_after_found=13):
             # 找到程序后等待指定时间
             time.sleep(wait_after_found)
             return windows
+
+        # 检查是否超时
+        if timeout is not None:
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= timeout:
+                return None
 
         # 等待指定间隔后再次检查
         time.sleep(check_interval)
@@ -161,7 +169,13 @@ def execute_main_loop(args):
     # 查找和等待窗口
     check_interval = getattr(args, 'check_interval', 1)
     wait_after_found = getattr(args, 'wait_after_found', 13)
-    windows = find_and_wait_for_windows(args.app, check_interval, wait_after_found)
+    timeout = getattr(args, 'timeout', None)
+    windows = find_and_wait_for_windows(args.app, check_interval, wait_after_found, timeout)
+    
+    # 检查是否超时
+    if windows is None:
+        print_json_and_flush({"success": False, "error": f"等待程序 {args.app} 启动超时（{timeout}秒）"})
+        sys.exit(1)
 
     # 处理找到的窗口
     for window_handle in windows:
@@ -211,6 +225,7 @@ def main():
     parser.add_argument('--dump-file', help='将窗口树结构保存到指定文件')
     parser.add_argument('--check-interval', type=int, default=1, help='检查程序是否启动的间隔时间（秒），默认1秒')
     parser.add_argument('--wait-after-found', type=int, default=13, help='找到程序后的等待时间（秒），默认13秒')
+    parser.add_argument('--timeout', type=int, help='等待程序启动的超时时间（秒），不指定则无限等待')
 
     args = parser.parse_args()
 

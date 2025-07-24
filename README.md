@@ -68,17 +68,18 @@ auto_sh.exe --app <应用名称> [选项]
 
 ### 命令行参数
 
-| 参数                   | 类型     | 必需 | 默认值 | 说明               |
-|----------------------|--------|----|-----|------------------|
-| `--app`              | string | ✅  | -   | 应用窗口名称（支持模糊匹配）   |
-| `--control`          | string | ❌  | -   | 控件名称             |
-| `--type`             | string | ❌  | -   | 控件类型             |
-| `--check`            | flag   | ❌  | -   | 输出窗口控件树结构        |
-| `--click`            | flag   | ❌  | -   | 执行点击操作           |
-| `--dump-file`        | string | ❌  | -   | 将窗口树结构保存到指定文件    |
-| `--check-interval`   | int    | ❌  | 1   | 检查程序是否启动的间隔时间（秒） |
-| `--wait-after-found` | int    | ❌  | 13  | 找到程序后的等待时间（秒）    |
-| `-h, --help`         | flag   | ❌  | -   | 显示帮助信息           |
+| 参数                   | 类型     | 必需 | 默认值 | 说明                      |
+|----------------------|--------|----|-----|-------------------------|
+| `--app`              | string | ✅  | -   | 应用窗口名称（支持模糊匹配）          |
+| `--control`          | string | ❌  | -   | 控件名称                    |
+| `--type`             | string | ❌  | -   | 控件类型                    |
+| `--check`            | flag   | ❌  | -   | 输出窗口控件树结构               |
+| `--click`            | flag   | ❌  | -   | 执行点击操作                  |
+| `--dump-file`        | string | ❌  | -   | 将窗口树结构保存到指定文件           |
+| `--check-interval`   | int    | ❌  | 1   | 检查程序是否启动的间隔时间（秒）        |
+| `--wait-after-found` | int    | ❌  | 13  | 找到程序后的等待时间（秒）           |
+| `--timeout`          | int    | ❌  | -   | 等待程序启动的超时时间（秒），不指定则无限等待 |
+| `-h, --help`         | flag   | ❌  | -   | 显示帮助信息                  |
 
 ### 使用示例
 
@@ -122,6 +123,19 @@ auto_sh.exe --app "新程序" --check
 # 如果目标程序未运行，工具会自动等待程序启动
 # 检测到程序启动后，等待指定时间再执行操作
 auto_sh.exe --app "待启动程序" --control "按钮" --type "Button" --click --wait-after-found 20
+```
+
+#### 6. 超时控制
+
+```bash
+# 设置30秒超时，如果程序在30秒内未启动则退出
+auto_sh.exe --app "目标程序" --control "按钮" --type "Button" --timeout 30
+
+# 结合其他参数使用超时功能
+auto_sh.exe --app "记事本" --check --timeout 60 --check-interval 2
+
+# 不设置超时（默认行为，无限等待）
+auto_sh.exe --app "目标程序" --control "按钮" --type "Button"
 ```
 
 ## JSON 输出格式
