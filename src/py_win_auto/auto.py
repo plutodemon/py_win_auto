@@ -3,6 +3,7 @@ import argparse
 import sys
 import json
 import time
+import pyautogui
 
 
 def print_json_and_flush(data):
@@ -112,8 +113,32 @@ def process_control_operation(window, control_name, control_type, should_click):
 
         # 根据参数决定是否执行点击
         if should_click:
-            text.click_input(coords=(center_x - rect.left, center_y - rect.top))
-            result["clicked"] = True
+            click_success = False
+            click_error_msg = None
+            
+            # 使用pyautogui进行绝对坐标点击
+            try:
+                # 禁用pyautogui的安全检查，防止鼠标移动导致异常
+                original_failsafe = pyautogui.FAILSAFE
+                pyautogui.FAILSAFE = False
+                
+                # 设置点击延迟，避免过快操作
+                pyautogui.PAUSE = 0.1
+                
+                # 使用绝对坐标点击，不受用户鼠标移动影响
+                pyautogui.click(center_x, center_y, duration=0.1)
+                click_success = True
+                
+                # 恢复原始设置
+                pyautogui.FAILSAFE = original_failsafe
+                
+            except Exception as e:
+                click_error_msg = f"pyautogui点击失败: {str(e)}"
+            
+            # 设置点击结果
+            result["clicked"] = click_success
+            if not click_success and click_error_msg:
+                result["click_error"] = click_error_msg
 
         return True, result
 
